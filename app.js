@@ -39,6 +39,32 @@ app.use(session({
     saveUninitialized: true
 }));
 
+
+
+// mongoDB 모듈 사용
+const mongoClient = require('mongodb').MongoClient;
+
+// 데이터베이스 객체를 위한 변수 선언
+let database;
+
+// 데이터베이스에 연결
+function connectDB() {
+    // 데이터베이스 연결 정보
+    const databaseURL = 'mongodb://127.0.0.1:27017/local';
+    
+    // 데이터베이스 연결
+    mongoClient.connect(databaseURL, function(err, db) {
+        if (err) throw err;
+    
+        console.log('데이터베이스에 연결되었습니다 : ' + databaseURL);
+        
+        // database 변수에 할당
+        database = db;
+    });
+}
+
+
+
 // 라우터 객체 참조
 const router = express.Router();
 
@@ -46,6 +72,7 @@ const router = express.Router();
 router.route('/process/login').post(function(req, res) {
     console.log('/process/login call');
 });
+
 
 // 라우터 객체 등록
 app.use('/', router);
@@ -60,8 +87,13 @@ const errorHandler = expressErrorHandler({
 app.use(expressErrorHandler.httpError(404, 'Page Not Found'));
 app.use(errorHandler);
 
+
+
 // 서버 시작
 const port = 3000;
 app.listen(port, function() {
     console.log(`Local Express Server Start... ${app.get('port')}`);
+    
+    // 데이터베이스 연결
+    connectDB();
 });
