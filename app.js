@@ -59,7 +59,32 @@ function connectDB() {
         console.log('데이터베이스에 연결되었습니다 : ' + databaseURL);
         
         // database 변수에 할당
-        database = db;
+        database = db.db('local');
+    });
+}
+
+const authUser = function(database, id, password, callback) {
+    console.log('authUser call');
+    
+    // users 컬렉션 참조
+    const users = database.collection('users');
+    
+    // 아이디와 비밀번호로 검색
+    users.find({
+        "id": id,
+        "password": password
+    }).toArray(function(err, docs) {
+        if (err) {
+            callback(err, null);
+        }
+        
+        if (docs.length > 0) {
+            console.log(`아이디 [${id}], 비밀번호 [${password}]가 일치하는 사용자 찾음`);
+            callback(null,docs);
+        } else {
+            console.log('일치하는 사용자를 찾지 못함');
+            callback(null, null);
+        }
     });
 }
 
@@ -69,8 +94,39 @@ function connectDB() {
 const router = express.Router();
 
 // 로그인 라우팅 함수 - 데이터베이스 정보와 비교
-router.route('/process/login').post(function(req, res) {
+app.post('/process/login', function(req, res) {
     console.log('/process/login call');
+    
+    const paramId = req.body.id;
+    const paramPassword = req.body.password;
+    
+    if (database) {
+        authUser(database, paramId, paramPassword, function(err, docs) {
+            if (err) throw err;
+            
+            if (docs) {
+                console.dir(docs);
+                const userName = docs[0].name;
+                res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
+                res.write(`<h1>로그인 성공</h1>`);
+                res.write(`<div><p>사용자 아이디 : ` + paramId + `</p></div>`);
+                res.write(`<div><p>사용자 이름 : ` + userName + `</p></div>`);
+                res.write(`<br><br><a href="/public/login.html">다시 로그인하기</a>`);
+                res.end();
+            } else {
+                res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
+                res.write(`<h1>로그인 실패</h1>`);
+                res.write(`<div><p>아이디와 비밀번호를 다시 확인하십시오</p></div>`);
+                res.write(`<br><br><a href="/public/login.html">다시 로그인하기</a>`);
+                res.end();
+            }
+        });
+    } else {
+        res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
+        res.write(`<h1>데이터베이스 연결 실패</h1>`);
+        res.write(`<div><p>데이터베이스를 찾지 못했습니다</p></div>`);
+        res.end();
+    }
 });
 
 
