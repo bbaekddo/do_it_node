@@ -6,7 +6,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const serveStatic = require('serve-static');
-// const errorHandler = require('errorhandler');
 
 // 에러 핸들러 모듈 사용
 const expressErrorHandler = require('express-error-handler');
@@ -40,53 +39,79 @@ app.use(session({
 }));
 
 
-
-// mongoDB 모듈 사용
-const mongoClient = require('mongodb').MongoClient;
+// mongoose 모듈 불러오기
+const mongoose = require('mongoose');
 
 // 데이터베이스 객체를 위한 변수 선언
 let database;
+
+// 데이터베이스 스키마 객체를 위한 변수 선언
+let userSchema;
+
+// 데이터베이스 모델 객체를 위한 변수 선언
+let userModel;
 
 // 데이터베이스에 연결
 function connectDB() {
     // 데이터베이스 연결 정보
     const databaseURL = 'mongodb://127.0.0.1:27017/local';
     
-    // 데이터베이스 연결
-    mongoClient.connect(databaseURL, function(err, db) {
-        if (err) throw err;
+    console.log('데이터 베이스 연결을 시도합니다');
     
-        console.log('데이터베이스에 연결되었습니다 : ' + databaseURL);
-        
-        // database 변수에 할당
-        database = db.db('local');
+    // 데이터베이스 연결
+    mongoose.Promise = global.Promise;
+    mongoose.connect(databaseURL);
+    database = mongoose.connection;
+    
+    database.on('error', console.error.bind(console, 'mongoose connection error'));
+    database.on('open', () => {
+        console.log('데이터 베이스에 연결되었습니다');
+    
+        // 스키마 정의
+        userSchema = mongoose.Schema({
+            id: { type: String, required: true, unique: true },
+            name: String,
+            password: { type: String, required: true }
+        });
+        console.log('스미카 정의 완료');
+    
+        // 모델 정의
+        userModel = mongoose.model('users', userSchema);
+        console.log('모델 정의 완료');
+    });
+    
+    // 연결이 끊어졌을 때 5초후 재연결
+    database.on('disconnected', () => {
+        console.log('연결이 끊어졌습니다. 5초 후 재연결합니다');
+        setInterval(connectDB, 5000);
     });
 }
 
+// 사용자 인증
 const authUser = function(database, id, password, callback) {
     console.log('authUser call');
     
-    // users 컬렉션 참조
-    const users = database.collection('users');
-    
-    // 아이디와 비밀번호로 검색
-    users.find({
+    // 아이디와 비밀번호로 사용자 검색
+    userModel.find({
         "id": id,
         "password": password
-    }).toArray(function(err, docs) {
+    },(err, result) => {
         if (err) {
             callback(err, null);
         }
+    
+        console.log(`아이디 : ${id} 비밀번호 : ${password}로 조회`);
+        console.dir(result);
         
-        if (docs.length > 0) {
-            console.log(`아이디 [${id}], 비밀번호 [${password}]가 일치하는 사용자 찾음`);
-            callback(null,docs);
+        if (result.length > 0) {
+            console.log('사용자 검색 완료');
+            callback(null, result);
         } else {
-            console.log('일치하는 사용자를 찾지 못함');
+            console.log('사용자 검색 불가');
             callback(null, null);
         }
     });
-}
+};
 
 
 
@@ -133,30 +158,21 @@ app.post('/process/login', function(req, res) {
 const addUser = function(database, id, name, password, callback) {
     console.log('addUser call');
     
-    // users 컬렉션 참조
-    const users = database.collection('users');
-    
-    // id, name, password 입력
-    users.insertOne({
+    const newUser = new userModel({
         "id": id,
         "name": name,
         "password": password
-    }, function(err, result) {
-        // 에러가 났을 때 콜백 함수 호출
+    });
+    
+    newUser.save((err) => {
         if (err) {
             callback(err, null);
         }
-        
-        // 오류가 아닌 경우 콜백 함수를 호출하면서 결과 객체 전달
-        if (result.insertedId !== null) {
-            console.log('사용자 추가됨 : ' + result.insertedId);
-        } else {
-            console.log('추가된 사용자 없음');
-        }
-        
-        callback(null, result);
+    
+        console.log('사용자 추가 완료');
+        callback(null, newUser);
     });
-}
+};
 
 // 사용자 추가 라우팅
 router.route('/process/adduser').post((req, res) => {
