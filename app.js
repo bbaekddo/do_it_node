@@ -70,13 +70,23 @@ function connectDB() {
         // 스키마 정의
         userSchema = mongoose.Schema({
             id: { type: String, required: true, unique: true },
-            name: String,
-            password: { type: String, required: true }
+            name: { type: String, index: 'hashed' },
+            password: { type: String, required: true },
+            age: { type: Number, 'default': -1 },
+            createdAt: { type: Date, index: { unique: false }, 'default': Date.now},
+            updatedAt: { type: Date, index: { unique: false }, 'default': Date.now}
+        });
+        // 스키마에 static 메소드 추가
+        userSchema.static('findById', function(id, callback) {
+            return this.find({ id }, callback);
+        });
+        userSchema.static('findAll', function(callback) {
+            return this.find({ }, callback);
         });
         console.log('스미카 정의 완료');
     
         // 모델 정의
-        userModel = mongoose.model('users', userSchema);
+        userModel = mongoose.model('users2', userSchema);
         console.log('모델 정의 완료');
     });
     
@@ -92,10 +102,7 @@ const authUser = function(database, id, password, callback) {
     console.log('authUser call');
     
     // 아이디와 비밀번호로 사용자 검색
-    userModel.find({
-        "id": id,
-        "password": password
-    },(err, result) => {
+    userModel.findById(id, function(err, result) {
         if (err) {
             callback(err, null);
         }
@@ -104,14 +111,65 @@ const authUser = function(database, id, password, callback) {
         console.dir(result);
         
         if (result.length > 0) {
-            console.log('사용자 검색 완료');
-            callback(null, result);
+            console.log('사용자 아이디 검색 완료');
+            
+            if (result[0]._doc.password === password) {
+                console.log('사용자 비밀번호 검색 완료');
+                callback(null, result);
+            } else {
+                console.log('사용자 비밀번호 틀림');
+                callback(null, null);
+            }
         } else {
             console.log('사용자 검색 불가');
             callback(null, null);
         }
     });
 };
+
+// 사용자 전체 조회
+app.post('/process/userlist',(req, res) => {
+    console.log('/process/userlist call');
+    
+    // 데이터 베이스 객체가 초기화된 경우, 모델 객체의 findAll 메소드 호출
+    if (database) {
+        // 1. 모든 사용자 검색
+        userModel.findAll((err, result) => {
+            // 에러 발생 시 클라이언트로 에러 응답 전송
+            if (err) {
+                console.log(`사용자 전체 조회 중 에러 발생 : ${err.stack}`);
+                
+                res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
+                res.write(`<h2>사용자 전체 조회 중 에러 발생</h2>`);
+                res.write(`<p>${err.stack}</p>`);
+                res.end();
+            }
+            
+            // 결과 있으면 목록을 응답 전송
+            if (result) {
+                console.dir(result);
+    
+                res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
+                res.write(`<h2>사용자 전체 목록</h2>`);
+                res.write(`<div><ul>`);
+                
+                for (let i = 0; i < result.length; i++) {
+                    const curId = result[i]._doc.id;
+                    const curName = result[i]._doc.name;
+                    res.write(`    <li>#${i} : ${curId}, ${curName}</li>`);
+                }
+    
+                res.write(`</ul></div>`);
+                res.end();
+            // 결과 객체 없으면 응답 전송
+            } else {
+                res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
+                res.write(`<h2>사용자 전체 조회 실패</h2>`);
+                res.end();
+            }
+        });
+    }
+})
 
 
 
@@ -122,8 +180,8 @@ const router = express.Router();
 app.post('/process/login', function(req, res) {
     console.log('/process/login call');
     
-    const paramId = req.body.id;
-    const paramPassword = req.body.password;
+    const paramId = req.body.id || req.query.id;
+    const paramPassword = req.body.password || req.query.password;
     
     if (database) {
         authUser(database, paramId, paramPassword, function(err, docs) {
