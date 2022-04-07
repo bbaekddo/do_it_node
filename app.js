@@ -13,6 +13,9 @@ const expressErrorHandler = require('express-error-handler');
 // Session 미들웨어 불러오기
 const session = require('express-session');
 
+// crypto 모듈 불러오기
+const crypto = require('crypto');
+
 // Express 객체 생성
 const app = express();
 
@@ -67,27 +70,7 @@ function connectDB() {
     database.on('open', () => {
         console.log('데이터 베이스에 연결되었습니다');
     
-        // 스키마 정의
-        userSchema = mongoose.Schema({
-            id: { type: String, required: true, unique: true },
-            name: { type: String, index: 'hashed' },
-            password: { type: String, required: true },
-            age: { type: Number, 'default': -1 },
-            createdAt: { type: Date, index: { unique: false }, 'default': Date.now},
-            updatedAt: { type: Date, index: { unique: false }, 'default': Date.now}
-        });
-        // 스키마에 static 메소드 추가
-        userSchema.static('findById', function(id, callback) {
-            return this.find({ id }, callback);
-        });
-        userSchema.static('findAll', function(callback) {
-            return this.find({ }, callback);
-        });
-        console.log('스미카 정의 완료');
-    
-        // 모델 정의
-        userModel = mongoose.model('users2', userSchema);
-        console.log('모델 정의 완료');
+        createUserSchema();
     });
     
     // 연결이 끊어졌을 때 5초후 재연결
@@ -96,6 +79,78 @@ function connectDB() {
         setInterval(connectDB, 5000);
     });
 }
+
+function createUserSchema() {
+    /*
+    * 스키마 정의
+    * password를 hashedPassword로 변경
+    * default 속성 추가
+    * salt 속성 추가
+    */
+    userSchema = mongoose.Schema({
+        id: { type: String, required: true, unique: true, 'default': ' ' },
+        name: { type: String, index: 'hashed', 'default': ' ' },
+        hashedPassword: { type: String, required: true, 'default': ' ' },
+        salt: { type: String, required: true },
+        age: { type: Number, 'default': -1 },
+        createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
+        updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
+    });
+    
+    // 스키마에 모델 인스턴스에서 사용할 수 있는 메소드 추가
+    // 비밀번호 암호화 메소드
+    userSchema.method('encryptPassword', (plainText, inSalt) => {
+        if (inSalt) {
+            return crypto.createHmac('sha1', inSalt).update(plainText).digest('hex');
+        } else {
+            return crypto.createHmac('sha1', this.salt).update(plainText).digest('hex');
+        }
+    });
+    
+    // salt 생성 메소드
+    userSchema.method('makeSalt', () => {
+        return Math.round((new Date().valueOf() * Math.random())) + '';
+    });
+    
+    // 인증 메소드 (입력된 비밀번호와 비교)
+    userSchema.method('authenticate', (plainText, inSalt, hashedPassword) => {
+        if (inSalt) {
+            console.log(`authenticate call : ${plainText} -> ${this.encryptPassword(plainText, inSalt)} : ${this.hashedPassword}`);
+            return this.encryptPassword(plainText, inSalt) === hashedPassword;
+        } else {
+            console.log(`authenticate call : ${plainText} -> ${this.encryptPassword(plainText)} : ${this.hashedPassword}`);
+            return this.encryptPassword(plainText) === hashedPassword;
+        }
+    });
+    
+    // 필수 속성에 대한 유효성 확인 (길이, 값 체크)
+    userSchema.path('id').validate((id) => {
+        return id.length;
+    }, 'id 필드 값이 없습니다');
+    
+    userSchema.path ('name').validate((name) => {
+        return name.length;
+    }, 'name 필드 값이 없습니다');
+    
+    
+    // password를 virtual 메소드로 정의
+    userSchema
+        .virtual('password')
+        .set(function(password) {
+            this._password = password;
+            this.salt = this.makeSalt();
+            this.hashedPassword = this.encryptPassword(password);
+            console.log(`virtual password call : ${this.hashedPassword}`);
+        })
+        .get(function() {
+            return this._password;
+        });
+    console.log('스키마 정의 완료');
+    
+    userModel = mongoose.model('users3', userSchema);
+    console.log('모델 정의 완료');
+}
+
 
 // 사용자 인증
 const authUser = function(database, id, password, callback) {
@@ -113,11 +168,15 @@ const authUser = function(database, id, password, callback) {
         if (result.length > 0) {
             console.log('사용자 아이디 검색 완료');
             
-            if (result[0]._doc.password === password) {
-                console.log('사용자 비밀번호 검색 완료');
+            // 비밀번호 확인
+            const user = new userModel({ id: id});
+            const authenticated = user.authenticate(password, result[0]._doc.salt, result[0]._doc.hashedPassword);
+            
+            if (authenticated) {
+                console.log('비밀번호 일치');
                 callback(null, result);
             } else {
-                console.log('사용자 비밀번호 틀림');
+                console.log('비밀번호 불일치');
                 callback(null, null);
             }
         } else {
@@ -216,19 +275,19 @@ app.post('/process/login', function(req, res) {
 const addUser = function(database, id, name, password, callback) {
     console.log('addUser call');
     
-    const newUser = new userModel({
+    const user = new userModel({
         "id": id,
         "name": name,
         "password": password
     });
     
-    newUser.save((err) => {
+    user.save((err) => {
         if (err) {
             callback(err, null);
         }
     
         console.log('사용자 추가 완료');
-        callback(null, newUser);
+        callback(null, user);
     });
 };
 
