@@ -90,12 +90,25 @@ function createUserSchema() {
     userSchema = mongoose.Schema({
         id: { type: String, required: true, unique: true, 'default': ' ' },
         name: { type: String, index: 'hashed', 'default': ' ' },
-        hashedPassword: { type: String, required: true, 'default': ' ' },
+        hashed_password: { type: String, required: true, 'default': ' ' },
         salt: { type: String, required: true },
         age: { type: Number, 'default': -1 },
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
         updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
     });
+    
+    // password를 virtual 메소드로 정의
+    userSchema
+        .virtual('password')
+        .set(function(password) {
+            this._password = password;
+            this.salt = this.makeSalt();
+            this.hashed_password = this.encryptPassword(password, this.salt);
+            console.log(`virtual password call : ${this.hashed_password}`);
+        })
+        .get(function() {
+            return this._password;
+        });
     
     // 스키마에 모델 인스턴스에서 사용할 수 있는 메소드 추가
     // 비밀번호 암호화 메소드
@@ -131,20 +144,6 @@ function createUserSchema() {
     userSchema.path ('name').validate((name) => {
         return name.length;
     }, 'name 필드 값이 없습니다');
-    
-    
-    // password를 virtual 메소드로 정의
-    userSchema
-        .virtual('password')
-        .set(function(password) {
-            this._password = password;
-            this.salt = this.makeSalt();
-            this.hashedPassword = this.encryptPassword(password);
-            console.log(`virtual password call : ${this.hashedPassword}`);
-        })
-        .get(function() {
-            return this._password;
-        });
     console.log('스키마 정의 완료');
     
     userModel = mongoose.model('users3', userSchema);
@@ -276,9 +275,9 @@ const addUser = function(database, id, name, password, callback) {
     console.log('addUser call');
     
     const user = new userModel({
-        "id": id,
-        "name": name,
-        "password": password
+        id: id,
+        name: name,
+        password: password
     });
     
     user.save((err) => {
