@@ -90,7 +90,7 @@ function createUserSchema() {
     userSchema = mongoose.Schema({
         id: { type: String, required: true, unique: true, 'default': ' ' },
         name: { type: String, index: 'hashed', 'default': ' ' },
-        hashed_password: { type: String, required: true, 'default': ' ' },
+        hashedPassword: { type: String, required: true, 'default': ' ' },
         salt: { type: String, required: true },
         age: { type: Number, 'default': -1 },
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
@@ -103,8 +103,8 @@ function createUserSchema() {
         .set(function(password) {
             this._password = password;
             this.salt = this.makeSalt();
-            this.hashed_password = this.encryptPassword(password, this.salt);
-            console.log(`virtual password call : ${this.hashed_password}`);
+            this.hashedPassword = this.encryptPassword(this._password, this.salt);
+            console.log(`virtual password call : ${this.hashedPassword}`);
         })
         .get(function() {
             return this._password;
