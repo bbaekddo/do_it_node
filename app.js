@@ -19,8 +19,11 @@ const app = express();
 // Route 객체 생성
 const userRoute = require('./routes/userRoute');
 
+// config 파일 불러오기
+const config = require('./config/setting');
+
 // 기본 속성 설정
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || config.port);
 
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -43,50 +46,21 @@ app.use(session({
 
 // mongoose 모듈 불러오기
 const mongoose = require('mongoose');
+const database = require('./database/database');
 
-// 데이터베이스 객체를 위한 변수 선언
-let database;
+database.init(app, config);
 
-// 데이터베이스 모델 객체를 위한 변수 선언
-let userModel;
-
-// 데이터베이스에 연결
-function connectDB() {
-    // 데이터베이스 연결 정보
-    const databaseURL = 'mongodb://127.0.0.1:27017/local';
-    
-    console.log('데이터 베이스 연결을 시도합니다');
-    
-    // 데이터베이스 연결
-    mongoose.Promise = global.Promise;
-    mongoose.connect(databaseURL);
-    database = mongoose.connection;
-    
-    database.on('error', console.error.bind(console, 'mongoose connection error'));
-    database.on('open', () => {
-        console.log('데이터 베이스에 연결되었습니다');
-    
-        createUserSchema();
-    });
-    
-    // 연결이 끊어졌을 때 5초후 재연결
-    database.on('disconnected', () => {
-        console.log('연결이 끊어졌습니다. 5초 후 재연결합니다');
-        setInterval(connectDB, 5000);
-    });
-}
-
-function createUserSchema() {
+/*function createUserSchema() {
     // userSchema 모듈 불러오기
     const userSchema = require('./database/userSchema').createSchema(mongoose);
     
     // userModel 정의
-    userModel = mongoose.model('users3', userSchema);
+    const userModel = mongoose.model('users3', userSchema);
     console.log('User Model 정의 완료');
     
     // init 호출
     userRoute.init(database, userSchema, userModel);
-}
+}*/
 
 // 라우터 객체 생성
 const router = express.Router();
@@ -94,9 +68,9 @@ const router = express.Router();
 // 라우터 객체 등록
 app.use('/', router);
 
-/*router.route('/process/addUser').post(userRoute.signUp);
+router.route('/process/addUser').post(userRoute.signUp);
 router.route('/process/login').post(userRoute.login);
-router.route('/process/userList').post(userRoute.userList);*/
+router.route('/process/userList').post(userRoute.userList);
 
 // 404 오류 페이지 설정
 const errorHandler = expressErrorHandler({
@@ -110,10 +84,6 @@ app.use(errorHandler);
 
 
 // 서버 시작
-const port = 3000;
-app.listen(port, function() {
+app.listen(config.port, function() {
     console.log(`Local Express Server Start... ${app.get('port')}`);
-    
-    // 데이터베이스 연결
-    connectDB();
 });

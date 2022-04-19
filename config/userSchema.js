@@ -1,15 +1,17 @@
 // crypto 모듈 불러오기
 const crypto = require('crypto');
 
+const schema = {};
+
 // 데이터베이스 스키마 객체를 위한 변수 선언
-function createSchema(mongoose) {
+schema.createSchema = function(mongoose) {
     /*
     * 스키마 정의
     * password를 hashedPassword로 변경
     * default 속성 추가
     * salt 속성 추가
     */
-    let userSchema = mongoose.Schema({
+    const userSchema = mongoose.Schema({
         id: { type: String, required: true, unique: true, 'default': ' ' },
         name: { type: String, index: 'hashed', 'default': ' ' },
         hashedPassword: { type: String, required: true, 'default': ' ' },
@@ -21,9 +23,6 @@ function createSchema(mongoose) {
     
     console.log('User Shcema 정의 완료');
     
-    return userSchema;
-    
-    /*
     // password를 virtual 메소드로 정의
     userSchema
         .virtual('password')
@@ -63,6 +62,14 @@ function createSchema(mongoose) {
         }
     });
     
+    // 스키마에 static 메소드 추가
+    userSchema.static('findById', function(id, callback) {
+        return this.find({ id }, callback);
+    });
+    userSchema.static('findAll', function(callback) {
+        return this.find({ }, callback);
+    });
+    
     // 필수 속성에 대한 유효성 확인 (길이, 값 체크)
     userSchema.path('id').validate((id) => {
         return id.length;
@@ -71,13 +78,12 @@ function createSchema(mongoose) {
     userSchema.path ('name').validate((name) => {
         return name.length;
     }, 'name 필드 값이 없습니다');
+    
     console.log('스키마 정의 완료');
     
-    userModel = mongoose.model('users3', userSchema);
-    console.log('모델 정의 완료');
-    */
+    return userSchema;
 };
 
 module.exports = {
-    createSchema
+    schema
 };

@@ -12,11 +12,9 @@ function init(db, schema, model) {
 }
 
 // 1. 사용자 회원가입
-function addUser(req, res) {
+function signUp(req, res) {
     console.log('회원가입 프로세스 시작');
     
-    // app 객체에 데이터베이스 속성 추가
-    const database = req.app.get('database');
     console.log(`database : ${database}`);
     
     const paramId = req.body.id || req.query.id;
@@ -142,7 +140,7 @@ function userList(req, res) {
 
 
 // 1. 사용자 회원가입
-function addUser(req, res) {
+function addUser(database, id, name, password, callback) {
     console.log('회원가입 프로세스 시작');
     
     const user = new userModel({
@@ -162,7 +160,7 @@ function addUser(req, res) {
 }
 
 // 2. 사용자 로그인
-function authUser(req, res) {
+function authUser(database, id, password, callback) {
     console.log('authUser call');
     
     // 아이디와 비밀번호로 사용자 검색
@@ -198,7 +196,7 @@ function authUser(req, res) {
 
 module.exports = {
     init,
-    addUser,
+    signUp,
     login,
     userList
 };
