@@ -12,7 +12,7 @@ database.init = function(app, config) {
 function connect(app, config) {
     console.log('connect function call...');
     
-    const databaseURL = config.db_url;
+    const databaseURL = config.dbURL;
     
     console.log('데이터 베이스 연결을 시도합니다');
     
@@ -37,11 +37,11 @@ function connect(app, config) {
 
 // config에 정의한 스키마 및 모델 객체 생성
 function createSchema(app, config) {
-    const schemaLength = config.db_schemas.length;
+    const schemaLength = config.dbSchemas.length;
     console.log(`설정된 스키마 개수 : ${schemaLength}`);
     
     for (let i = 0; i < schemaLength; i++) {
-        const currentItem = config.db_schemas[i];
+        const currentItem = config.dbSchemas[i];
         
         // 모듈 파일에서 모듈을 불러온 후 createSchema 함수 호출
         const currentSchema = require(currentItem.file).schema.createSchema(mongoose);

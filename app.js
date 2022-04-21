@@ -22,8 +22,14 @@ const userRoute = require('./routes/userRoute');
 // config 파일 불러오기
 const config = require('./config/setting');
 
+// 데이터베이스 설정 파일 불러오기
+const database = require('./database/database');
+
 // 기본 속성 설정
 app.set('port', process.env.PORT || config.port);
+
+// 데이터베이스 시작
+database.init(app, config);
 
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -43,24 +49,6 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
-
-// mongoose 모듈 불러오기
-const mongoose = require('mongoose');
-const database = require('./database/database');
-
-database.init(app, config);
-
-/*function createUserSchema() {
-    // userSchema 모듈 불러오기
-    const userSchema = require('./database/userSchema').createSchema(mongoose);
-    
-    // userModel 정의
-    const userModel = mongoose.model('users3', userSchema);
-    console.log('User Model 정의 완료');
-    
-    // init 호출
-    userRoute.init(database, userSchema, userModel);
-}*/
 
 // 라우터 객체 생성
 const router = express.Router();
