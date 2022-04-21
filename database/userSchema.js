@@ -38,7 +38,7 @@ schema.createUserSchema = function(mongoose) {
     
     // 스키마에 모델 인스턴스에서 사용할 수 있는 메소드 추가
     // 비밀번호 암호화 메소드
-    userSchema.method('encryptPassword', (plainText, inSalt) => {
+    userSchema.method('encryptPassword', function(plainText, inSalt) {
         if (inSalt) {
             return crypto.createHmac('sha1', inSalt).update(plainText).digest('hex');
         } else {
@@ -52,7 +52,7 @@ schema.createUserSchema = function(mongoose) {
     });
     
     // 인증 메소드 (입력된 비밀번호와 비교)
-    userSchema.method('authenticate', (plainText, inSalt, hashedPassword) => {
+    userSchema.method('authenticate', function(plainText, inSalt, hashedPassword) {
         if (inSalt) {
             console.log(`authenticate call : ${plainText} -> ${this.encryptPassword(plainText, inSalt)} : ${this.hashedPassword}`);
             return this.encryptPassword(plainText, inSalt) === hashedPassword;

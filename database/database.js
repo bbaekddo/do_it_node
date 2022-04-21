@@ -52,7 +52,7 @@ function createSchema(app, config) {
     // 데이터베이스 객체를 app의 속성으로 추가
     app.set('database', database);
     
-    // 라우팅 초기화
+    // 라우팅 초기화 (반드시 데이터베이스 객체가 app의 속성에 등록돼야 함)
     const routeInfo = config.routeInfo;
     const userRoute = require(routeInfo[0].file);
     userRoute.init(app);
