@@ -11,6 +11,26 @@ setting.dbSchemas = [
         modelName: 'userModel'
     }
 ];
+setting.routeInfo = [
+    {
+        file: `${__dirname}/../routes/userRoute`,
+        path: '/process/addUser',
+        method: 'signUp',
+        type: 'post'
+    },
+    {
+        file: `${__dirname}/../routes/userRoute`,
+        path: '/process/login',
+        method: 'login',
+        type: 'post'
+    },
+    {
+        file: `${__dirname}/../routes/userRoute`,
+        path: '/process/userList',
+        method: 'userList',
+        type: 'post'
+    }
+]
 
 module.exports = setting;
 

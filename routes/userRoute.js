@@ -3,19 +3,17 @@ let database;
 let userSchema;
 let userModel;
 
-function init(db, schema, model) {
+function init(app) {
     console.log('Route initializing...');
-    
-    database = db;
-    userSchema = schema;
-    userModel = model;
+
+    database = app.get('database');
+    userSchema = database.userSchema;
+    userModel = database.userModel;
 }
 
 // 1. 사용자 회원가입
 function signUp(req, res) {
     console.log('회원가입 프로세스 시작');
-    
-    console.log(`database : ${database}`);
     
     const paramId = req.body.id || req.query.id;
     const paramName = req.body.name || req.query.name;
@@ -49,13 +47,7 @@ function signUp(req, res) {
     }
 }
 
-/*
-router.route('/process/adduser').post((req, res) => {
-});
-*/
-
-
-// 로그인 라우팅 함수 - 데이터베이스 정보와 비교
+// 2. 로그인 라우팅 함수 - 데이터베이스 정보와 비교
 function login(req, res) {
     console.log('/process/login call');
     
@@ -135,9 +127,6 @@ function userList(req, res) {
         });
     }
 }
-
-
-
 
 // 1. 사용자 회원가입
 function addUser(database, id, name, password, callback) {

@@ -1,10 +1,12 @@
 // crypto 모듈 불러오기
 const crypto = require('crypto');
+const config = require("../config/setting");
 
+// 스키마 객체 생성
 const schema = {};
 
 // 데이터베이스 스키마 객체를 위한 변수 선언
-schema.createSchema = function(mongoose) {
+schema.createUserSchema = function(mongoose) {
     /*
     * 스키마 정의
     * password를 hashedPassword로 변경
@@ -20,8 +22,6 @@ schema.createSchema = function(mongoose) {
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
         updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
     });
-    
-    console.log('User Shcema 정의 완료');
     
     // password를 virtual 메소드로 정의
     userSchema
@@ -80,10 +80,8 @@ schema.createSchema = function(mongoose) {
     }, 'name 필드 값이 없습니다');
     
     console.log('스키마 정의 완료');
-    
+
     return userSchema;
 };
 
-module.exports = {
-    schema
-};
+module.exports = schema;

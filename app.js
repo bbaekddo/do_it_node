@@ -52,13 +52,11 @@ app.use(session({
 
 // 라우터 객체 생성
 const router = express.Router();
+const routeLoader = require('./routes/routeLoader');
 
-// 라우터 객체 등록
-app.use('/', router);
+// 라우팅 시작
+routeLoader.init(app, router);
 
-router.route('/process/addUser').post(userRoute.signUp);
-router.route('/process/login').post(userRoute.login);
-router.route('/process/userList').post(userRoute.userList);
 
 // 404 오류 페이지 설정
 const errorHandler = expressErrorHandler({
