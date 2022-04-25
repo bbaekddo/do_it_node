@@ -31,6 +31,12 @@ app.set('port', process.env.PORT || config.port);
 // 데이터베이스 시작
 database.init(app, config);
 
+// 뷰 엔진 설정
+app.set('views', `${__dirname}/views`);
+app.set('view engine', 'ejs');
+console.log('ejs view engine is set');
+
+
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -56,7 +62,6 @@ const routeLoader = require('./routes/routeLoader');
 
 // 라우팅 시작
 routeLoader.init(app, router);
-
 
 // 404 오류 페이지 설정
 const errorHandler = expressErrorHandler({
