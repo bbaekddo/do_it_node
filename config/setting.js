@@ -29,6 +29,12 @@ setting.routeInfo = [
         path: '/process/userList',
         method: 'userList',
         type: 'post'
+    },
+    {
+        file: `${__dirname}/../routes/testPug`,
+        path: '/process/test',
+        method: 'test',
+        type: 'post'
     }
 ]
 

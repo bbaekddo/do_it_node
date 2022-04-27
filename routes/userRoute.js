@@ -138,7 +138,7 @@ function userList(req, res) {
     
                 // 뷰 템플릿을 이용해 렌더링 후 전송
                 const context = { result: result };
-                req.app.render('listUser', context, (err, html) => {
+                req.app.render('userList', context, (err, html) => {
                     if (err) {
                         throw err;
                     }

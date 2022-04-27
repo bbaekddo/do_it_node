@@ -33,9 +33,7 @@ database.init(app, config);
 
 // 뷰 엔진 설정
 app.set('views', `${__dirname}/views`);
-app.set('view engine', 'ejs');
-console.log('ejs view engine is set');
-
+app.set('view engine', 'pug');
 
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
