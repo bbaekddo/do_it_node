@@ -31,8 +31,24 @@ function signUp(req, res) {
                 console.dir(result);
                 
                 res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
-                res.write(`<h2>사용자 추가 성공</h2>`);
-                res.end();
+                
+                // 뷰 템플릿으로 렌더링 후 전송
+                const context = { title: '사용자 추가 성공' };
+                req.app.render('addUser', context, (err, html) => {
+                    if (err) {
+                        console.error(`뷰 렌더링 중 오류 발생 : ${err.stack}`);
+                        
+                        res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8'});
+                        res.write(`<h2>뷰 렌더링 중 오류 발생</h2>`);
+                        res.write(`<p>${err.stack}</p>`);
+                        res.end();
+    
+                        return;
+                    }
+                    
+                    res.end(html);
+                })
+                
             } else {
                 res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
                 res.write(`<h2>사용자 추가 실패</h2>`);
@@ -62,11 +78,23 @@ function login(req, res) {
                 console.dir(docs);
                 const userName = docs[0].name;
                 res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
-                res.write(`<h1>로그인 성공</h1>`);
-                res.write(`<div><p>사용자 아이디 : ` + paramId + `</p></div>`);
-                res.write(`<div><p>사용자 이름 : ` + userName + `</p></div>`);
-                res.write(`<br><br><a href="/public/login.html">다시 로그인하기</a>`);
-                res.end();
+                
+                // 뷰 템플릿을 사용해서 렌더링 후 전송
+                const context = { userId: paramId, userName: userName };
+                req.app.render('loginSuccess', context, (err, html) => {
+                    if (err) {
+                        console.error(`뷰 렌더링 중 오류 발생 ${err.stack}`);
+                        
+                        res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
+                        res.write(`<h2>뷰 렌더링 중 오류 발생</h2>`);
+                        res.write(`<p>err.stack</p>`);
+                        res.end();
+                        
+                        return;
+                    }
+    
+                    res.end(html);
+                })
             } else {
                 res.writeHead('200', { 'Content-Type': 'text/html;charset=utf8'});
                 res.write(`<h1>로그인 실패</h1>`);
@@ -107,17 +135,15 @@ function userList(req, res) {
                 console.dir(result);
                 
                 res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
-                res.write(`<h2>사용자 전체 목록</h2>`);
-                res.write(`<div><ul>`);
-                
-                for (let i = 0; i < result.length; i++) {
-                    const curId = result[i]._doc.id;
-                    const curName = result[i]._doc.name;
-                    res.write(`    <li>#${i} : ${curId}, ${curName}</li>`);
-                }
-                
-                res.write(`</ul></div>`);
-                res.end();
+    
+                // 뷰 템플릿을 이용해 렌더링 후 전송
+                const context = { result: result };
+                req.app.render('userList', context, (err, html) => {
+                    if (err) {
+                        throw err;
+                    }
+                    res.end(html);
+                })
                 // 결과 객체 없으면 응답 전송
             } else {
                 res.writeHead('200', { "Content-Type": "text/html;charset=utf8"});
