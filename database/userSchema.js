@@ -1,6 +1,5 @@
 // crypto 모듈 불러오기
 const crypto = require('crypto');
-const config = require("../config/setting");
 
 // 스키마 객체 생성
 const schema = {};
@@ -72,8 +71,6 @@ schema.createUserSchema = function(mongoose) {
     userSchema.static('findAll', function(callback) {
         return this.find({ }, callback);
     });
-    
-    
 
     return userSchema;
 };

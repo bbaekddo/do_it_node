@@ -22,7 +22,7 @@ const flash = require('connect-flash');
 
 // 라우터 객체 생성
 const router = express.Router();
-const routeLoader = require('./routes/routeLoader');
+// const routeLoader = require('./routes/routeLoader');
 
 // -------------- //
 
@@ -148,7 +148,7 @@ passport.deserializeUser((user, done) => {
 database.init(app, config);
 
 // 라우팅 시작
-routeLoader.init(app, router);
+// routeLoader.init(app, router);
 
 // 홈 화면 라우팅
 router.route('/').get((req, res) => {
