@@ -1,3 +1,4 @@
+/*
 // 객체 설정
 let database;
 let userSchema;
@@ -214,4 +215,4 @@ module.exports = {
     signUp,
     login,
     userList
-};
+};*/

@@ -14,14 +14,17 @@ schema.createUserSchema = function(mongoose) {
     * salt 속성 추가
     */
     const userSchema = mongoose.Schema({
-        id: { type: String, required: true, unique: true, 'default': ' ' },
-        name: { type: String, index: 'hashed', 'default': ' ' },
+        email: { type: String, required: true, unique: true, 'default': ' ' },
         hashedPassword: { type: String, required: true, 'default': ' ' },
+        name: { type: String, index: 'hashed', 'default': ' ' },
         salt: { type: String, required: true },
-        age: { type: Number, 'default': -1 },
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
         updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
     });
+    
+    // 이메일과 비밀번호 유효성 검사
+    userSchema.path('email').validate((email) => email.length, 'email 컬럼 값이 없습니다');
+    userSchema.path('hashedPassword').validate((hashedPassword) => hashedPassword.length, 'password 컬럼 값이 없습니다');
     
     // password를 virtual 메소드로 정의
     userSchema
@@ -63,23 +66,14 @@ schema.createUserSchema = function(mongoose) {
     });
     
     // 스키마에 static 메소드 추가
-    userSchema.static('findById', function(id, callback) {
-        return this.find({ id }, callback);
+    userSchema.static('findByEmail', function(email, callback) {
+        return this.find({ email: email }, callback);
     });
     userSchema.static('findAll', function(callback) {
         return this.find({ }, callback);
     });
     
-    // 필수 속성에 대한 유효성 확인 (길이, 값 체크)
-    userSchema.path('id').validate((id) => {
-        return id.length;
-    }, 'id 필드 값이 없습니다');
     
-    userSchema.path ('name').validate((name) => {
-        return name.length;
-    }, 'name 필드 값이 없습니다');
-    
-    console.log('스키마 정의 완료');
 
     return userSchema;
 };
