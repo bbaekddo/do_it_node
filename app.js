@@ -5,6 +5,7 @@ const path = require('path');
 // Express 미들웨어 불러오기
 const bodyParser = require('body-parser');
 const serveStatic = require('serve-static');
+const session = require('express-session');
 
 // 에러 핸들러 모듈 사용
 const expressErrorHandler = require('express-error-handler');
@@ -22,7 +23,6 @@ const flash = require('connect-flash');
 
 // 라우터 객체 생성
 const router = express.Router();
-// const routeLoader = require('./routes/routeLoader');
 
 // -------------- //
 
@@ -34,10 +34,20 @@ app.set('port', process.env.PORT || config.port);
 app.set('views', `${__dirname}/views`);
 app.set('view engine', 'pug');
 
-// passport 초기화
-app.use(passport.initialize);
-app.use(passport.session);
-app.use(flash);
+// 세선 설정
+app.use(session({
+    secret: 'myKey',
+    resave: true,
+    saveUninitialized: true
+}));
+
+// 패스포트 초기화
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
+// 라우터 사용
+app.use('/', router);
 
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -48,8 +58,6 @@ app.use(bodyParser.json());
 // public 폴더를 static으로 오픈
 app.use('/public', serveStatic(path.join(__dirname, 'public')));
 
-// 404 page error
-app.use(expressErrorHandler.httpError(404, 'Page Not Found'));
 
 // passport 로그인 설정
 passport.use('localLogin', new localStrategy({
@@ -147,44 +155,41 @@ passport.deserializeUser((user, done) => {
 // 데이터베이스 시작
 database.init(app, config);
 
-// 라우팅 시작
-// routeLoader.init(app, router);
-
 // 홈 화면 라우팅
-router.route('/').get((req, res) => {
+app.get('/', (req, res) => {
     console.log('/ 패스 요청됨');
     
     res.render('index.ejs');
 });
 
 // 로그인 요청 화면
-app.get('/login', (req, res) => {
-    console.log('/login 패스 요청됨');
-    
-    res.render('login.ejs', { message: req.flash('loginMessage') });
-});
-
-app.post('/login', passport.authenticate('localLogin', {
-    successRedirect: '/profile',
-    failureRedirect: '/login',
-    failureFlash: true
-}));
+app.route('/login')
+    .get((req, res) => {
+        console.log('/login 패스 요청됨');
+        
+        res.render('login.ejs', { message: req.flash('loginMessage') });
+    })
+    .post(passport.authenticate('localLogin', {
+        successRedirect: '/profile',
+        failureRedirect: '/login',
+        failureFlash: true
+    }));
 
 // 회원가입 요청 화면
-app.get('/signUp', (req, res) => {
-    console.log('/signUp 패스 요청됨');
-    
-    res.render('signUp.ejs', { message: req.flash('signUpMessage') });
-});
-
-app.post('/signUp', passport.authenticate('localSignUp', {
-    successRedirect: '/profile',
-    failureRedirect: '/signUp',
-    failureFlash: true
-}));
+app.route('/signUp')
+    .get((req, res) => {
+        console.log('/signUp 패스 요청됨');
+        
+        res.render('signUp.ejs', { message: req.flash('signUpMessage') });
+    })
+    .post(passport.authenticate('localSignUp', {
+        successRedirect: '/profile',
+        failureRedirect: '/signUp',
+        failureFlash: true
+    }));
 
 // 프로필 요청 화면
-router.route('/profile').get((req, res) => {
+app.get('/profile', (req, res) => {
     console.log('/profile 패스 요청됨');
     
     // 인증된 경우 req.user 객체에 사용자 정보가 있으며, 인증이 안된 경우 req.user는 false
@@ -214,15 +219,8 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-/*
-// 404 오류 페이지 설정
-const errorHandler = expressErrorHandler({
-    static: {
-        '404': './public/404.html'
-    }
-});
-app.use(errorHandler);
-*/
+// 404 page error (마지막에 사용 유의!!)
+app.use(expressErrorHandler.httpError(404, 'Page Not Found'));
 
 // 서버 시작
 app.listen(config.port, function() {

@@ -71,6 +71,8 @@ schema.createUserSchema = function(mongoose) {
     userSchema.static('findAll', function(callback) {
         return this.find({ }, callback);
     });
+    
+    console.log('스키마 생성 완료');
 
     return userSchema;
 };
