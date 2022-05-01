@@ -14,8 +14,8 @@ setting.dbSchemas = [
 setting.routeInfo = [
 ];
 setting.facebook = {
-    clientID: '420065332493079',
-    clientSecret: 'a222b4bef624e1b918018e879cb1b1f6',
+    clientID: 'id',
+    clientSecret: 'secret',
     callbackURL: '/auth/facebook/callback'
 }
 

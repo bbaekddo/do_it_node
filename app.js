@@ -1,4 +1,4 @@
-// Express 기본 모듈 불러오기
+// Express 기본 모듈 사용
 const express = require('express');
 const path = require('path');
 
@@ -21,6 +21,12 @@ const passport = require('passport');
 const configPassport = require('./config/passportSetting');
 const userPassport = require('./routes/userPassport');
 const flash = require('connect-flash');
+
+// socket.io 모듈 사용
+const socketio = require('socket.io');
+
+// cors 모듈 사용
+const cors = require('cors');
 
 // 라우터 객체 생성
 const router = express.Router();
@@ -47,6 +53,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+// cors 사용
+app.use(cors());
+
 // 라우터 사용
 app.use('/', router);
 
@@ -72,6 +81,19 @@ userPassport(app, passport);
 app.use(expressErrorHandler.httpError(404, 'Page Not Found'));
 
 // 서버 시작
-app.listen(config.port, function() {
+const server = app.listen(config.port, function() {
     console.log(`Local Express Server Start... ${app.get('port')}`);
+});
+
+// socket.io 서버 시작
+const io = socketio(server, { path: '/socket.io' });
+console.log('socket.io 요청을 받아들일 준비가 되었습니다');
+
+// 클라이언트가 연결했을 때 이벤트 처리
+io.sockets.on('connection', (socket) => {
+    console.log(`connection info : ${socket.request.connection._peername}`);
+    
+    // 소켓 객체에 클라이언트 Host, Port 정보를 속성으로 추가
+    socket.remoteAddress = socket.request.connection._peername.address;
+    socket.remotePort = socket.request.connection._peername.port;
 });
