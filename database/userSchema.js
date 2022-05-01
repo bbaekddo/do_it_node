@@ -1,6 +1,5 @@
 // crypto 모듈 불러오기
 const crypto = require('crypto');
-const config = require("../config/setting");
 
 // 스키마 객체 생성
 const schema = {};
@@ -14,15 +13,17 @@ schema.createUserSchema = function(mongoose) {
     * salt 속성 추가
     */
     const userSchema = mongoose.Schema({
-        id: { type: String, required: true, unique: true, 'default': ' ' },
-        name: { type: String, index: 'hashed', 'default': ' ' },
-        hashedPassword: { type: String, required: true, 'default': ' ' },
-        salt: { type: String, required: true },
-        age: { type: Number, 'default': -1 },
+        email: { type: String, 'default': '' },
+        hashedPassword: { type: String, 'default': '' },
+        name: { type: String, index: 'hashed', 'default': '' },
+        salt: { type: String },
+        provider: { type: String, 'default': '' },
+        authToken: { type: String, 'default': '' },
+        facebook: { },
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
         updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
     });
-    
+   
     // password를 virtual 메소드로 정의
     userSchema
         .virtual('password')
@@ -63,23 +64,14 @@ schema.createUserSchema = function(mongoose) {
     });
     
     // 스키마에 static 메소드 추가
-    userSchema.static('findById', function(id, callback) {
-        return this.find({ id }, callback);
+    userSchema.static('findByEmail', function(email, callback) {
+        return this.find({ email: email }, callback);
     });
     userSchema.static('findAll', function(callback) {
         return this.find({ }, callback);
     });
     
-    // 필수 속성에 대한 유효성 확인 (길이, 값 체크)
-    userSchema.path('id').validate((id) => {
-        return id.length;
-    }, 'id 필드 값이 없습니다');
-    
-    userSchema.path ('name').validate((name) => {
-        return name.length;
-    }, 'name 필드 값이 없습니다');
-    
-    console.log('스키마 정의 완료');
+    console.log('스키마 생성 완료');
 
     return userSchema;
 };
