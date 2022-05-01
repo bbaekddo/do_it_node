@@ -1,5 +1,6 @@
 const localLogin = require('./passport/localLogin');
 const localSignUp = require('./passport/localSignUp');
+const facebook = require('./passport/facebook');
 
 const setting = (app, passport) => {
     console.log('/config/passport Call...');
@@ -23,6 +24,7 @@ const setting = (app, passport) => {
     // 인증 방식 설정
     passport.use('localLogin', localLogin);
     passport.use('localSignUp', localSignUp);
+    passport.use('facebook', facebook(app, passport));
 };
 
 module.exports = {

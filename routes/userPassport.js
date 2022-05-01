@@ -8,7 +8,7 @@ module.exports = (router, passport) => {
         res.render('index.ejs');
     });
 
-// 로그인 요청 화면
+    // 로그인 요청 화면
     router.route('/login')
         .get((req, res) => {
             console.log('/login 패스 요청됨');
@@ -21,7 +21,7 @@ module.exports = (router, passport) => {
             failureFlash: true
         }));
 
-// 회원가입 요청 화면
+    // 회원가입 요청 화면
     router.route('/signUp')
         .get((req, res) => {
             console.log('/signUp 패스 요청됨');
@@ -34,7 +34,7 @@ module.exports = (router, passport) => {
             failureFlash: true
         }));
 
-// 프로필 요청 화면
+    // 프로필 요청 화면
     router.get('/profile', (req, res) => {
         console.log('/profile 패스 요청됨');
         
@@ -58,10 +58,21 @@ module.exports = (router, passport) => {
         }
     });
 
-// 로그아웃 요청 화면
+    // 로그아웃 요청 화면
     router.get('/logout', (req, res) => {
         console.log('/logout 패스 요청됨');
         req.logout();
         res.redirect('/');
     });
+    
+    // 페이스북 인증 라우팅
+    router.get('/auth/facebook', passport.authenticate('facebook', {
+        scope: 'email'
+    }));
+    
+    // 페이스북 인증 콜백 라우팅
+    router.get('/auth/facebook/callback', passport.authenticate('facebook', {
+        successRedirect: '/profile',
+        failureRedirect: '/'
+    }));
 }

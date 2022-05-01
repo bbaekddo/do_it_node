@@ -13,18 +13,17 @@ schema.createUserSchema = function(mongoose) {
     * salt 속성 추가
     */
     const userSchema = mongoose.Schema({
-        email: { type: String, required: true, unique: true, 'default': ' ' },
-        hashedPassword: { type: String, required: true, 'default': ' ' },
-        name: { type: String, index: 'hashed', 'default': ' ' },
-        salt: { type: String, required: true },
+        email: { type: String, 'default': '' },
+        hashedPassword: { type: String, 'default': '' },
+        name: { type: String, index: 'hashed', 'default': '' },
+        salt: { type: String },
+        provider: { type: String, 'default': '' },
+        authToken: { type: String, 'default': '' },
+        facebook: { },
         createdAt: { type: Date, index: { unique: false }, 'default': Date.now },
         updatedAt: { type: Date, index: { unique: false }, 'default': Date.now }
     });
-    
-    // 이메일과 비밀번호 유효성 검사
-    userSchema.path('email').validate((email) => email.length, 'email 컬럼 값이 없습니다');
-    userSchema.path('hashedPassword').validate((hashedPassword) => hashedPassword.length, 'password 컬럼 값이 없습니다');
-    
+   
     // password를 virtual 메소드로 정의
     userSchema
         .virtual('password')
