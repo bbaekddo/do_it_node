@@ -50,3 +50,5 @@
 - socket.io 모듈 설치
 - socket.io src 불러오기
 > 📍 socket.io 버전 유의 및 사용법 공식 사이트 참고
+> 
+> io.socket.connected -> socket.to 메소드 변경 유의!
