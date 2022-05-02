@@ -91,7 +91,19 @@ console.log('socket.io 요청을 받아들일 준비가 되었습니다');
 
 // 클라이언트가 연결했을 때 이벤트 처리
 io.sockets.on('connection', (socket) => {
-    console.log(`connection info : ${socket.request.connection._peername}`);
+    console.log('connection info : ', socket.request.connection._peername);
+    
+    // message 이벤트를 받았을 때
+    socket.on('message', (message) => {
+        console.log('message 이벤트를 받았습니다');
+        console.dir(message);
+        
+        if (message.recepient === 'ALL') {
+            // 나를 포함한 모든 클라이언트에게 메세지 전달
+            console.dir('나를 포함한 모든 클라이언트에게 message 이벤트를 전송합니다');
+            io.sockets.emit('message', message);
+        }
+    })
     
     // 소켓 객체에 클라이언트 Host, Port 정보를 속성으로 추가
     socket.remoteAddress = socket.request.connection._peername.address;
