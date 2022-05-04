@@ -49,8 +49,19 @@
 ## 6. 채팅 서버
 - socket.io 모듈 설치
 - socket.io src 불러오기
+
 > 📍 socket.io 버전 유의 및 사용법 공식 사이트 참고
 > 
 > io.socket.connected -> socket.to 메소드 변경 유의!
 > 
 > 클라이언트 부분에서 socket 객체 위치를 보고 메소드 사용할 것
+
+- 1:1 채팅 기능 구현
+- 그룹 채팅방 만들기
+
+> 📍 socket.io 버전 유의
+>
+> ES6부터 io.sockets.adapter.rooms의 반환 객체가 Map 객체로 변경됨
+> 
+> 책에 나와있는 내용이랑 다르므로 수정해서 반영함
+
