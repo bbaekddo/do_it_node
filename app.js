@@ -1,4 +1,4 @@
-// Express 기본 모듈 불러오기
+// Express 기본 모듈 사용
 const express = require('express');
 const path = require('path');
 
@@ -21,6 +21,12 @@ const passport = require('passport');
 const configPassport = require('./config/passportSetting');
 const userPassport = require('./routes/userPassport');
 const flash = require('connect-flash');
+
+// socket.io 모듈 사용
+const socketio = require('socket.io');
+
+// cors 모듈 사용
+const cors = require('cors');
 
 // 라우터 객체 생성
 const router = express.Router();
@@ -47,6 +53,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+// cors 사용
+app.use(cors());
+
 // 라우터 사용
 app.use('/', router);
 
@@ -72,6 +81,87 @@ userPassport(app, passport);
 app.use(expressErrorHandler.httpError(404, 'Page Not Found'));
 
 // 서버 시작
-app.listen(config.port, function() {
+const server = app.listen(config.port, function() {
     console.log(`Local Express Server Start... ${app.get('port')}`);
+});
+
+// socket.io 서버 시작
+const io = socketio(server, { path: '/socket.io' });
+console.log('socket.io 요청을 받아들일 준비가 되었습니다');
+
+// 로그인 아이디 매핑(로그인 id -> 소켓 id)
+const loginIds = {};
+
+// 클라이언트가 연결했을 때 이벤트 처리
+io.sockets.on('connection', (socket) => {
+    console.log('connection info : ', socket.request.connection._peername);
+    
+    // 로그인 이벤트를 받았을 때
+    socket.on('login', function(login) {
+        console.log('login 이벤트를 받았습니다');
+        console.dir(login);
+        
+        // 기존 클라이언트 ID가 없으면 클라이언트 ID를 맵에 추가
+        console.log(`접속한 소켓의 ID : ${socket.id}`);
+        loginIds[login.id] = socket.id;
+        socket.loginId = login.id;
+    
+        console.log(`접속한 클라이언트 ID 개수 : ${Object.keys(loginIds).length}`);
+        
+        // 응답메세지 전송
+        sendResponse(socket, 'login', '200', '로그인되었습니다');
+    });
+    
+    // 로그아웃 이벤트를 받았을 때
+    socket.on('logout', function(logout) {
+        console.log('logout 이벤트를 받았습니다');
+        console.dir(logout);
+        
+        // 기존 클라이언트 ID가 없으면 클라이언트 ID를 맵에 추가
+        console.log(`접속한 소켓의 ID : ${socket.id}`);
+        delete loginIds[logout.id];
+        delete socket.loginId;
+        
+        console.log(`접속한 클라이언트 ID 개수 : ${Object.keys(loginIds).length}`);
+        
+        // 응답메세지 전송
+        sendResponse(socket, 'logout', '200', '로그아웃 되었습니다');
+    });
+    
+    // message 이벤트를 받았을 때
+    socket.on('message', function(message) {
+        console.log('message 이벤트를 받았습니다');
+        console.dir(message);
+        
+        if (message.recepient === 'ALL') {
+            // 나를 포함한 모든 클라이언트에게 메세지 전달
+            console.dir('나를 포함한 모든 클라이언트에게 message 이벤트를 전송합니다');
+            io.sockets.emit('message', message);
+        } else {
+            // 일대일 채팅 대상에게 메세지 전달
+            if (loginIds[message.recepient]) {
+                socket.to([loginIds[message.recepient]]).emit('message', message);
+                
+                // 응답 메세지 전송
+                sendResponse(socket, 'message', '200', '메세지를 전송했습니다');
+            } else {
+                sendResponse(socket, 'login', '404', '상대방의 로그인 ID를 찾을 수 없습니다');
+            }
+        }
+    });
+    
+    // 응답 메세지 전송 메소드
+    function sendResponse(socket, command, code, message) {
+        const statusObj = {
+            command: command,
+            code: code,
+            message: message
+        };
+        
+        socket.emit('response', statusObj);
+    }
+    
+    // 소켓 객체에 클라이언트 Host, Port 정보를 속성으로 추가
+    socket.remoteAddress = socket.request.connection._peername.address;
+    socket.remotePort = socket.request.connection._peername.port;
 });
