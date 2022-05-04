@@ -112,6 +112,22 @@ io.sockets.on('connection', (socket) => {
         sendResponse(socket, 'login', '200', '로그인되었습니다');
     });
     
+    // 로그아웃 이벤트를 받았을 때
+    socket.on('logout', function(logout) {
+        console.log('logout 이벤트를 받았습니다');
+        console.dir(logout);
+        
+        // 기존 클라이언트 ID가 없으면 클라이언트 ID를 맵에 추가
+        console.log(`접속한 소켓의 ID : ${socket.id}`);
+        delete loginIds[logout.id];
+        delete socket.loginId;
+        
+        console.log(`접속한 클라이언트 ID 개수 : ${Object.keys(loginIds).length}`);
+        
+        // 응답메세지 전송
+        sendResponse(socket, 'logout', '200', '로그아웃 되었습니다');
+    });
+    
     // message 이벤트를 받았을 때
     socket.on('message', function(message) {
         console.log('message 이벤트를 받았습니다');
