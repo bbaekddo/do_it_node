@@ -150,6 +150,55 @@ io.sockets.on('connection', (socket) => {
         }
     });
     
+    // room 이벤트를 받았을 때
+    socket.on('room', function(room) {
+        console.log('room 이벤트를 받았습니다');
+        console.dir(room);
+        
+        if (room.command === 'create') {
+            if (io.sockets.adapter.rooms.get(room.roomId)) {
+                console.log('방이 이미 만들어져 있습니다');
+                console.dir(io.sockets.adapter.rooms.get(room.roomId));
+            } else {
+                console.log('방을 새로 생성합니다');
+                
+                socket.join(room.roomId);
+                
+                let currentRoom = io.sockets.adapter.rooms.get(room.roomId);
+                currentRoom.id = room.roomId;
+                currentRoom.name = room.roomName;
+                currentRoom.owner = room.roomOwner;
+            }
+        } else if (room.command === 'update') {
+            let currentRoom = io.sockets.adapter.rooms.get(room.roomId);
+            currentRoom.name = room.roomName;
+            currentRoom.owner = room.roomOwner;
+        } else if (room.command === 'delete') {
+            socket.leave(room.roomId);
+            
+            if (io.sockets.adapter.rooms.get(room.roomId)) {
+                delete io.sockets.adapter.rooms.get(room.roomId);
+                console.log(`---------------`);
+                console.dir(io.sockets.adapter.rooms);
+                console.log(`---------------`);
+            } else {
+                console.log('방이 만들어져 있지 않습니다');
+            }
+        } else {
+            alert('room command error!');
+        }
+        
+        const roomList = getRoomList();
+        
+        const output = {
+            rooms: roomList,
+            command: 'list'
+        };
+        console.log(`클라이언트로 보낼 데이터 : ${JSON.stringify(output)}`);
+        
+        io.sockets.emit('room', output);
+    })
+    
     // 응답 메세지 전송 메소드
     function sendResponse(socket, command, code, message) {
         const statusObj = {
@@ -159,6 +208,34 @@ io.sockets.on('connection', (socket) => {
         };
         
         socket.emit('response', statusObj);
+    }
+    
+    // 사용자가 추가한 방 조회
+    function getRoomList() {
+        const roomList = [];
+    
+        // room ID와 socket ID가 다른 Map 객체 찾기
+        for (let [key, value] of io.sockets.adapter.rooms) {
+            const outRoom = Array.from(value);
+    
+            let foundDefault = false;
+            let index = 0;
+            outRoom.forEach((setValues) => {
+                if (key === setValues) {
+                    foundDefault = true;
+                }
+                index++;
+            });
+            
+            if (!foundDefault) {
+                roomList.push(io.sockets.adapter.rooms.get(key));
+            }
+        }
+        
+        console.log('[ROOM LIST]');
+        console.dir(roomList);
+        
+        return roomList;
     }
     
     // 소켓 객체에 클라이언트 Host, Port 정보를 속성으로 추가
