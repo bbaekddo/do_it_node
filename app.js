@@ -135,17 +135,26 @@ io.sockets.on('connection', (socket) => {
         
         if (message.recepient === 'ALL') {
             // 나를 포함한 모든 클라이언트에게 메세지 전달
-            console.dir('나를 포함한 모든 클라이언트에게 message 이벤트를 전송합니다');
+            console.log('나를 포함한 모든 클라이언트에게 message 이벤트를 전송합니다');
             io.sockets.emit('message', message);
         } else {
-            // 일대일 채팅 대상에게 메세지 전달
-            if (loginIds[message.recepient]) {
-                socket.to([loginIds[message.recepient]]).emit('message', message);
+            // command 속성으로 일대일 채팅과 그룹 채팅 구별
+            if (message.command === 'chat') {
+                // 일대일 채팅 대상에게 메세지 전달
+                if (loginIds[message.recepient]) {
+                    socket.to([loginIds[message.recepient]]).emit('message', message);
+        
+                    // 응답 메세지 전송
+                    sendResponse(socket, 'message', '200', '메세지를 전송했습니다');
+                } else {
+                    sendResponse(socket, 'login', '404', '상대방의 로그인 ID를 찾을 수 없습니다');
+                }
+            } else if (message.command === 'groupChat') {
+                // 방에 들어있는 모든 사용자에게 메세지 전달
+                socket.to(message.recepient).emit('message', message);
                 
                 // 응답 메세지 전송
-                sendResponse(socket, 'message', '200', '메세지를 전송했습니다');
-            } else {
-                sendResponse(socket, 'login', '404', '상대방의 로그인 ID를 찾을 수 없습니다');
+                sendResponse(socket, 'message', '200', `방 [${message.recepient}]의 모든 사용자들에게 메세지를 전송했습니다`);
             }
         }
     });
@@ -178,12 +187,19 @@ io.sockets.on('connection', (socket) => {
             
             if (io.sockets.adapter.rooms.get(room.roomId)) {
                 delete io.sockets.adapter.rooms.get(room.roomId);
-                console.log(`---------------`);
-                console.dir(io.sockets.adapter.rooms);
-                console.log(`---------------`);
             } else {
                 console.log('방이 만들어져 있지 않습니다');
             }
+        } else if (room.command === 'join') {
+            socket.join(room.roomId);
+            
+            // 응답 메세지 전송
+            sendResponse(socket, 'room', '200', '방에 입장했습니다');
+        } else if (room.command === 'leave') {
+            socket.leave(room.roomId);
+            
+            // 응답 메세지 전송
+            sendResponse(socket, 'room', '200', '방에서 나갔습니다');
         } else {
             alert('room command error!');
         }
