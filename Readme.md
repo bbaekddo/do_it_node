@@ -61,7 +61,19 @@
 
 > 📍 socket.io 버전 유의
 >
-> ES6부터 io.sockets.adapter.rooms의 반환 객체가 Map 객체로 변경됨
+> socket.id ver.3부터 io.sockets.adapter.rooms의 반환 객체가 Map 객체로 변경됨
+> 
+> io.socket.adapter.rooms **[object.key]** -> io.sockets.adapter.rooms. **get(object.key)** 로 변경
 > 
 > 책에 나와있는 내용이랑 다르므로 수정해서 반영함
+>
+> io.to -> **나를 포함한** 모든 대상에게 event emit
+> 
+> socket.to -> **나를 제외한** 모든 대상에게 event emit
+
+- jQuery => Vanila Javascript로 변환
+
+> 📍 jQuery의 메소드 내용 확인
+>
+> jQeury의 메소드 중 변환하려는 기능이 무엇인지 파악한 뒤 Vanila Javascript로 구현
 
