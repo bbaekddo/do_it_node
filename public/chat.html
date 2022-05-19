@@ -22,22 +22,6 @@
         <input type="button" id="logoutButton" value="로그아웃">
     </div>
     <br>
-    <!--<div>
-        <div>
-            <span>보내는 사람 아이디 : </span>
-            <input type="text" id="senderInput" value="test01">
-        </div>
-        <div>
-            <span>받는 사람 아이디 : </span>
-            <input type="text" id="recepientInput" value="ALL">
-        </div>
-        <div>
-            <span>메세지 데이터 : </span>
-            <input type="text" id="dataInput" value="안녕!">
-        </div>
-        <br>
-        <input type="button" id="sendButton" value="전송">
-    </div>-->
     <br>
     <div>
         <input type="text" id="roomIdInput" value="meeting01">
@@ -48,7 +32,9 @@
         <input type="button" id="deleteRoomButton" value="방 없애기">
     </div>
     <br>
-    <div id="roomList"></div>
+    <div id="roomList">
+        <p class="rooms"></p>
+    </div>
     <br>
     <div>
         <input type="button" id="joinRoomButton" value="방 입장하기">
@@ -85,14 +71,14 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
-<!--    <script src="/socket.io/socket.io.js"></script>-->
     <script>
         let host;
         let port;
         let socket;
 
+        // jquery 원본 모음
         // 문서 로딩 후 실행
-        $(function() {
+        /*$(function() {
             $("#connectionButton").bind('click', function(event) {
                 println('connectButton이 클릭되었습니다');
                 host = $('#hostInput').val();
@@ -100,14 +86,49 @@
 
                 connectToServer();
             });
+        });*/
+
+        // 로그인 버튼을 클릭하면 처리
+        /* $("#loginButton").bind('click', function(event) {
+             const id = $('#idInput').val();
+             const password = $('#passwordInput').val();
+             const alias = $('#aliasInput').val();
+             const today = $('#todayInput').val();
+
+             const output = {
+                 id: id,
+                 password: password,
+                 alias: alias,
+                 today: today
+             };
+             console.log(`서버로 보낼 데이터 : ${JSON.stringify(output)}`);
+
+             if (socket === undefined) {
+                 alert('서버에 연결되어 있지 않습니다. 서버에 먼저 연결하세요');
+                 return;
+             }
+
+             socket.emit('login', output);
+         });*/
+
+
+
+
+        // 문서 로딩 후 실행
+        document.querySelector('#connectionButton').addEventListener('click', (event) => {
+            println('connectButton이 클릭되었습니다');
+            host = document.querySelector('#hostInput').value;
+            port = document.querySelector('#portInput').value;
+
+            connectToServer();
         });
 
         // 로그인 버튼을 클릭하면 처리
-        $("#loginButton").bind('click', function(event) {
-            const id = $('#idInput').val();
-            const password = $('#passwordInput').val();
-            const alias = $('#aliasInput').val();
-            const today = $('#todayInput').val();
+        document.querySelector('#loginButton').addEventListener('click', (event) => {
+            const id = document.querySelector('#idInput').value;
+            const password = document.querySelector('#passwordInput').value;
+            const alias = document.querySelector('#aliasInput').value;
+            const today = document.querySelector('#todayInput').value;
 
             const output = {
                 id: id,
@@ -126,8 +147,8 @@
         });
 
         // 로그아웃 버튼을 클릭하면 처리
-        $("#logoutButton").bind('click', function(event) {
-            const id = $('#idInput').val();
+        document.querySelector("#logoutButton").addEventListener('click', (event) => {
+            const id = document.querySelector('#idInput').value;
             const output = {
                 id: id
             };
@@ -141,34 +162,11 @@
             socket.emit('logout', output);
         });
 
-        // 전송 버튼을 클릭하면 처리
-        /*$("#sendButton").bind('click', function(event) {
-            const sender = $('#senderInput').val();
-            const recepient = $('#recepientInput').val();
-            const data = $('#dataInput').val();
-
-            const output = {
-                sender: sender,
-                recepient: recepient,
-                command: 'chat',
-                type: 'text',
-                data: data
-            };
-            console.log(`서버로 보낼 데이터 : ${JSON.stringify(output)}`);
-
-            if (socket === undefined) {
-                alert('서버에 연결되어 있지 않습니다. 서버에 먼저 연결하세요');
-                return;
-            }
-
-            socket.emit('message', output);
-        });*/
-
         // 방 만들기 버튼을 클릭하면 처리
-        $('#createRoomButton').bind('click', function(event) {
-            const roomId = $('#roomIdInput').val();
-            const roomName = $('#roomNameInput').val();
-            const id = $('#idInput').val();
+        document.querySelector('#createRoomButton').addEventListener('click', (event) => {
+            const roomId = document.querySelector('#roomIdInput').value;
+            const roomName = document.querySelector('#roomNameInput').value;
+            const id = document.querySelector('#idInput').value;
 
             const output = {
                 command: 'create',
@@ -187,10 +185,10 @@
         });
 
         // 방 이름 변경 버튼을 클릭하면 처리
-        $('#updateRoomButton').bind('click', function(event) {
-            const roomId = $('#roomIdInput').val();
-            const roomName = $('#roomNameInput').val();
-            const id = $('#idInput').val();
+        document.querySelector('#updateRoomButton').addEventListener('click', (event) => {
+            const roomId = document.querySelector('#roomIdInput').value;
+            const roomName = document.querySelector('#roomNameInput').value;
+            const id = document.querySelector('#idInput').value;
 
             const output = {
                 command: 'update',
@@ -209,8 +207,8 @@
         });
 
         // 방 없애기 버튼을 클릭하면 처리
-        $('#deleteRoomButton').bind('click', function(event) {
-            const roomId = $('#roomIdInput').val();
+        document.querySelector('#deleteRoomButton').addEventListener('click', (event) => {
+            const roomId = document.querySelector('#roomIdInput').value;
 
             const output = {
                 command: 'delete',
@@ -226,8 +224,8 @@
         });
 
         // 방 입장하기 버튼을 클릭하면 처리
-        $('#joinRoomButton').bind('click', (event) => {
-            const roomId = $('#roomIdInput').val();
+        document.querySelector('#joinRoomButton').addEventListener('click', (event) => {
+            const roomId = document.querySelector('#roomIdInput').value;
 
             const output = {
                     command: 'join',
@@ -244,8 +242,8 @@
         });
 
         // 방 나가기 버튼을 클릭하면 처리
-        $('#leaveRoomButton').bind('click', (event) => {
-            const roomId = $('#roomIdInput').val();
+        document.querySelector('#leaveRoomButton').addEventListener('click', (event) => {
+            const roomId = document.querySelector('#roomIdInput').value;
 
             const output = {
                 command: 'leave',
@@ -262,13 +260,14 @@
         });
 
         // 전송 버튼을 클릭하면 처리
-        $('#sendButton').bind('click', (event) => {
+        document.querySelector('#sendButton').addEventListener('click', (event) => {
             // chatType 구별
-            const chatType = $('#chatType option:selected').val();
+            let chatType = document.querySelector('#chatType');
+            chatType = chatType.options[chatType.selectedIndex].value;
 
-            const sender = $('#senderInput').val();
-            const recepient = $('#recepientInput').val();
-            const data = $('#dataInput').val();
+            const sender = document.querySelector('#senderInput').value;
+            const recepient = document.querySelector('#recepientInput').value;
+            const data = document.querySelector('#dataInput').value;
 
             const output = {
                 sender: sender,
@@ -318,10 +317,24 @@
 
                 if (data.command === 'list') {
                     const roomCount = data.rooms.length;
-                    $('#roomList').html(`<p>방 리스트 ${roomCount}개</p>`);
-                    for (let i = 0; i < roomCount; i++) {
-                        $('#roomList').append(`<p>방 #${i + 1} : ${data.rooms[i].id}, ${data.rooms[i].name}, ${data.rooms[i].owner}</p>`);
+
+                    // 바닐라 자바스크립트 변환
+                    // 페이지 불러올 때마다 roomList의 자식 노드 삭제
+                    let parentNode = document.querySelector('#roomList');
+                    while (parentNode.hasChildNodes()) {
+                        parentNode.removeChild(parentNode.firstChild);
                     }
+
+                    // roomList의 자식 노드 추가
+                    let roomListTitle = document.createElement('p');
+                    roomListTitle.insertAdjacentHTML('beforeend', `<p>방 리스트 ${roomCount}개</p>`);
+                    parentNode.appendChild(roomListTitle);
+
+                    let roomTitle = document.createElement('p');
+                    for (let i = 0; i < roomCount; i++) {
+                        roomTitle.insertAdjacentHTML('beforeend', `<p>방 #${i + 1} : ${data.rooms[i].id}, ${data.rooms[i].name}, ${data.rooms[i].owner}</p>`);
+                    }
+                    parentNode.appendChild(roomTitle);
                 }
             });
 
@@ -334,7 +347,9 @@
 
         function println(data) {
             console.log(data);
-            $('#result').append(`<p>${data}</p>`);
+            let newParagraph = document.createElement('p');
+            newParagraph.textContent = `${data}`;
+            document.querySelector('#result').appendChild(newParagraph);
         }
     </script>
 </body>
