@@ -49,8 +49,31 @@
 ## 6. 채팅 서버
 - socket.io 모듈 설치
 - socket.io src 불러오기
+
 > 📍 socket.io 버전 유의 및 사용법 공식 사이트 참고
 > 
 > io.socket.connected -> socket.to 메소드 변경 유의!
 > 
 > 클라이언트 부분에서 socket 객체 위치를 보고 메소드 사용할 것
+
+- 1:1 채팅 기능 구현
+- 그룹 채팅방 만들기
+
+> 📍 socket.io 버전 유의
+>
+> socket.id ver.3부터 io.sockets.adapter.rooms의 반환 객체가 Map 객체로 변경됨
+> 
+> io.socket.adapter.rooms **[object.key]** -> io.sockets.adapter.rooms. **get(object.key)** 로 변경
+> 
+> 책에 나와있는 내용이랑 다르므로 수정해서 반영함
+>
+> io.to -> **나를 포함한** 모든 대상에게 event emit
+> 
+> socket.to -> **나를 제외한** 모든 대상에게 event emit
+
+- jQuery => Vanila Javascript로 변환
+
+> 📍 jQuery의 메소드 내용 확인
+>
+> jQeury의 메소드 중 변환하려는 기능이 무엇인지 파악한 뒤 Vanila Javascript로 구현
+
