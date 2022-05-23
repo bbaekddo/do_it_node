@@ -25,10 +25,9 @@
 
             $('#requestButton').click(() => {
                 const message = $('#messageInput').val();
-                const method = 'echo';
+                const method = 'echoError';
 
                 $.jsonRPC.request(method, {
-                    id: 1001,
                     params: [message],
                     success: function(data) {
                         println('정상 응답을 받았습니다');
@@ -38,7 +37,7 @@
                     error: function(data) {
                         println('오류 응답을 받았습니다');
                         console.dir(data);
-                        println(data.error.message);
+                        println(`${data.error.code}, ${data.error.message}`);
                     }
                 });
 
