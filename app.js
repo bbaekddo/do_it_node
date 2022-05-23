@@ -28,6 +28,10 @@ const socketio = require('socket.io');
 // cors 모듈 사용
 const cors = require('cors');
 
+// JSON-RPC 모듈 사용
+const handlerLoader = require('./handler/handlerLoader');
+const jayson = require('jayson');
+
 // 라우터 객체 생성
 const router = express.Router();
 
@@ -76,6 +80,11 @@ configPassport.setting(app, passport);
 
 // Passport 라우팅
 userPassport(app, passport);
+
+// JSON-RPC 핸들러 정보를 읽어들여 핸들러 경로 설정
+const jsonRPC_APIPath = config.jsonrpc_api_path || '/api';
+handlerLoader.init(jayson, app, jsonRPC_APIPath);
+console.log(`JSON-RPC를 [${jsonRPC_APIPath}] 패스에서 사용하도록 설정함`);
 
 // 404 page error (마지막에 사용 유의!!)
 app.use(expressErrorHandler.httpError(404, 'Page Not Found'));

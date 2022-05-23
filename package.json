@@ -21,6 +21,7 @@
     "express-session": "^1.17.2",
     "gulp": "^4.0.2",
     "http-errors": "~1.6.3",
+    "jayson": "^3.6.6",
     "mongodb": "^4.5.0",
     "mongoose": "^6.2.10",
     "morgan": "~1.9.1",
