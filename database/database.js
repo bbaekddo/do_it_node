@@ -37,7 +37,7 @@ function createSchema(app, config) {
         
         // setting 파일에서 스키마 모듈 불러오기
         const currentUserSchema = require(currentItem.file);
-        const currentSchema = currentUserSchema.createUserSchema(mongoose);
+        const currentSchema = currentUserSchema.createCustomSchema(mongoose);
         
         // User 모델 정의
         const currentModel = mongoose.model(currentItem.collection, currentSchema);

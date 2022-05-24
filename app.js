@@ -36,6 +36,9 @@ const jayson = require('jayson');
 // 라우터 객체 생성
 const router = express.Router();
 
+// 라우터 로더 불러오기
+const routeLoader = require('./routes/routeLoader');
+
 // -------------- //
 
 // Express 객체 생성
@@ -61,9 +64,6 @@ app.use(flash());
 // cors 사용
 app.use(cors());
 
-// 라우터 사용
-app.use('/', router);
-
 // body-parser를 사용해 url 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -72,6 +72,9 @@ app.use(bodyParser.json());
 
 // public 폴더를 static으로 오픈
 app.use('/public', serveStatic(path.join(__dirname, 'public')));
+
+// 라우터 시작
+routeLoader.init(app, router);
 
 // 데이터베이스 시작
 database.init(app, config);
