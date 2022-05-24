@@ -1,4 +1,4 @@
-const add = (req, res) => {
+const add = function(req, res) {
     console.log(`cafe 모둘 안에 있는 add 호출됨`);
     
     const paramName = req.body.name || req.query.name;
@@ -66,8 +66,8 @@ function addCafe(database, name, address, phone, longitude, latitude, callback) 
     })
 }
 
-// 카페 조회하는 함수
-const list = (req, res) => {
+// 모든 카페 조회
+const list = function(req, res) {
     console.log(`cafe 모듈안에 있는 list 호출됨`);
     
     // 데이터베이스 객체 참조
@@ -75,7 +75,6 @@ const list = (req, res) => {
     
     // 데이터베이스 객체가 초기화된 경우
     if (globalDB.db) {
-        // 1. 모든 카페 검색
         globalDB.cafeModel.findAll((error, results) => {
             if (error) {
                 console.error(`카페 리스트 조회 중 에러 발생 : ${error.stack}`);
@@ -117,5 +116,65 @@ const list = (req, res) => {
     }
 }
 
-module.exports.add = add;
-module.exports.list = list;
+// 근처 카페 검색
+const findNear = function(req, res) {
+    console.log(`cafe 모듈 안에 있는 findNear 호출됨`);
+    
+    const maxDistance = 1000;
+    
+    const paramLongitude = req.body.longitude || req.query.longitude;
+    const paramLatitude = req.body.latitude || req.query.latitude;
+    
+    console.log(`요청 파라미터 : ${paramLongitude}, ${paramLatitude}`);
+    
+    // 데이터베이스 객체 참조
+    const globalDB = req.app.get('database');
+    
+    // 데이터베이스가 초기화 된 경우
+    if (globalDB.db) {
+        globalDB.cafeModel.findNear(paramLongitude, paramLatitude, maxDistance, function(error, results) {
+            if (error) {
+                console.error(`카페 검색 중 에러 발생 : ${error.stack}`);
+                
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>카페 검색 중 에러 발생</h2>`);
+                res.write(`<p>${error.stack}</p>`);
+                res.end();
+            }
+            
+            if (results) {
+                console.dir(results);
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>가까운 카페</h2>`);
+                res.write(`<div><ul>`);
+                
+                for (let i = 0; i < results.length; i++) {
+                    const currentName = results[i]._doc.name;
+                    const currentAddress = results[i]._doc.address;
+                    const currentPhone = results[i]._doc.phone;
+                    const currentLongitude = results[i].geometry.coordinates[0];
+                    const currentLatitude = results[i].geometry.coordinates[1];
+                    
+                    res.write(`<li>#${i + 1} : ${currentName}, ${currentAddress}, ${currentPhone}, ${currentLongitude}, ${currentLatitude}</li>`);
+                }
+                
+                res.write(`</ul></div>`);
+                res.end();
+            } else {
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>가까운 카페 조회 실패</h2>`);
+                res.end();
+            }
+        });
+    } else {
+        res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+        res.write(`<h2>데이터베이스 연결 실패</h2>`);
+        res.end();
+    }
+}
+
+module.exports = {
+    add,
+    list,
+    findNear
+};

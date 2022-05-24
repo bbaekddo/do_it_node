@@ -19,7 +19,8 @@ setting.dbSchemas = [
 ];
 setting.routeInfo = [
     { file: `${__dirname}/../routes/cafe`, path: '/process/addCafe', method: 'add', type: 'post' },
-    { file: `${__dirname}/../routes/cafe`, path: '/process/listCafe', method: 'list', type: 'post' }
+    { file: `${__dirname}/../routes/cafe`, path: '/process/listCafe', method: 'list', type: 'post' },
+    { file: `${__dirname}/../routes/cafe`, path: '/process/nearCafe', method: 'findNear', type: 'post' }
 ];
 setting.facebook = {
     clientID: 'id',
