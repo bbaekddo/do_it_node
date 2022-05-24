@@ -7,6 +7,7 @@
 <body>
     <h3>JSON-RPC ListUser 테스트</h3>
     <br>
+    <textarea name="messageInput" id="messageInput" cols="30" rows="10"></textarea>
     <br>
     <input type="button" name="requestButton" id="requestButton" value="요청하기">
     <p>결과</p>
@@ -14,6 +15,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="./jquery-jsonrpc/jquery.jsonrpc.js"></script>
+    <script src="cryptojs/aes.js"></script>
     <script>
         $(function() {
             $.jsonRPC.setup({
@@ -22,42 +24,41 @@
             });
 
             $('#requestButton').click(() => {
-                const method = 'listUser';
-                const id = 1004;
-                const params = [];
+                const message = $('#messageInput').val();
 
-                sendRequest(method, id, params);
+                // 암호화 테스트
+                const secret = 'my secret';
+                const encrypted = '' + CryptoJS.AES.encrypt(message, secret);
+                console.log(`encrypted : ${encrypted}`);
 
-                println(`[${method}] method로 요청을 보냈습니다`);
-            });
+                // 복호화 테스트
+                const decrypted = CryptoJS.AES.decrypt(encrypted, secret).toString(CryptoJS.enc.Utf8);
+                console.log(`decrypted : ${decrypted}`);
+                const method = 'echoEncrypted';
 
-            function sendRequest(method, id, params) {
                 $.jsonRPC.request(method, {
-                    id: id,
-                    params: params,
+                    id: 1001,
+                    params: [encrypted],
                     success: function(data) {
                         println('정상 응답을 받았습니다');
                         console.dir(data);
-                        processResponse(data);
+
+                        const secret = 'my secret';
+                        const encrypted = data.result[0];
+                        const decrypted = CryptoJS.AES.decrypt(encrypted, secret).toString(CryptoJS.enc.Utf8);
+
+                        console.log(decrypted);
+                        println(decrypted);
                     },
                     error: function(data) {
                         println('오류 응답을 받았습니다');
                         console.dir(data);
-                        processResponse(data);
+                        println(data.error.message);
                     }
                 });
-            }
 
-            function processResponse(data) {
-                if (Array.isArray(data.result)) {
-                    println(`사용자 수 : ${data.result.length}`);
-                    data.result.forEach((item, index) => {
-                        println(`#${index + 1} : ${item.id}, ${item.name}`);
-                    });
-                } else {
-                    println(`결과 데이터가 배열 타입이 아닙니다`);
-                }
-            }
+                println(`[${method}] method로 요청을 보냈습니다`);
+            });
 
             function println(data) {
                 $('#results').append(`<p>${data}</p>`);
