@@ -77,3 +77,15 @@
 >
 > jQeury의 메소드 중 변환하려는 기능이 무엇인지 파악한 뒤 Vanila Javascript로 구현
 
+## 7. JSON-RPC
+- jayson 모듈 설치
+- echo 모듈 구현
+- 계산기 모듈 구현
+- 사용자 목록 조회
+
+> 📍 global 객체
+>
+> database를 global 객체로 접근하려면 먼저 app.js에서 global.database로 등록해야함
+> mongoose 객체의 요소 파악
+
+- crypto 암호화

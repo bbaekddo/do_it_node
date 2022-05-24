@@ -19,4 +19,6 @@ setting.facebook = {
     callbackURL: '/auth/facebook/callback'
 }
 
+setting.jsonrpc_api_path = '/api';
+
 module.exports = setting;

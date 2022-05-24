@@ -3,3 +3,5 @@
 /package-lock.json
 *.iml
 /config
+/참고용 소스파일
+/public/jquery-jsonrpc/
