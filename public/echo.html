@@ -5,11 +5,7 @@
     <title>Echo</title>
 </head>
 <body>
-    <h3>JSON-RPC Add 테스트</h3>
-    <br>
-    <input type="text" value="10" name="inputA" id="inputA">
-    <p>+</p>
-    <input type="text" value="10" name="inputB" id="inputB">
+    <h3>JSON-RPC ListUser 테스트</h3>
     <br>
     <br>
     <input type="button" name="requestButton" id="requestButton" value="요청하기">
@@ -26,29 +22,42 @@
             });
 
             $('#requestButton').click(() => {
-                const inputA = $('#inputA').val();
-                const inputB = $('#inputB').val();
-                const a = Number(inputA);
-                const b = Number(inputB);
-                const method = 'add';
+                const method = 'listUser';
+                const id = 1004;
+                const params = [];
 
+                sendRequest(method, id, params);
+
+                println(`[${method}] method로 요청을 보냈습니다`);
+            });
+
+            function sendRequest(method, id, params) {
                 $.jsonRPC.request(method, {
-                    id: 1002,
-                    params: [a, b],
+                    id: id,
+                    params: params,
                     success: function(data) {
                         println('정상 응답을 받았습니다');
                         console.dir(data);
-                        println(data.result);
+                        processResponse(data);
                     },
                     error: function(data) {
                         println('오류 응답을 받았습니다');
                         console.dir(data);
-                        println(`${data.error.code}, ${data.error.message}`);
+                        processResponse(data);
                     }
                 });
+            }
 
-                println(`[${method}] method로 요청을 보냈습니다`);
-            });
+            function processResponse(data) {
+                if (Array.isArray(data.result)) {
+                    println(`사용자 수 : ${data.result.length}`);
+                    data.result.forEach((item, index) => {
+                        println(`#${index + 1} : ${item.id}, ${item.name}`);
+                    });
+                } else {
+                    println(`결과 데이터가 배열 타입이 아닙니다`);
+                }
+            }
 
             function println(data) {
                 $('#results').append(`<p>${data}</p>`);

@@ -15,6 +15,7 @@ const config = require('./config/setting');
 
 // 데이터베이스 설정 파일 불러오기
 const database = require('./database/database');
+global.database = database;
 
 // passport 사용
 const passport = require('passport');
