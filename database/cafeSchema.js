@@ -43,7 +43,19 @@ schema.createCustomSchema = (mongoose) => {
             ]
         }).exec(callback);
     });
-
+    
+    // 반경 안의 카페 조회 static 함수
+    cafeSchema.static('findCircle', function(longitude, latitude, radius, callback) {
+        console.log(`반경 안의 카페 조회 함수 호출됨`);
+        
+        // change radian : 1/6371 -> 1km
+        this.find().where('geometry').within({
+            center: [parseFloat(longitude), parseFloat(latitude)],
+            radius: parseFloat(radius/6371000),
+            unique: true,
+            spherical: true
+        }).exec(callback);
+    });
     
     console.log('Cafe 스키마 생성 완료');
     

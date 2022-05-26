@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Circle Cafe</title>
+</head>
+<body>
+    <h3>반경 내 카페 찾기</h3>
+    <br>
+    <p>삼성역 3번 출구 버스 정류장 반경 내 100m</p>
+    <br>
+    <form action="/process/circleCafe" method="post">
+        <table>
+            <tr>
+                <td><label>중심점 경도</label></td>
+                <td><input type="text" name="longitude" value="127.0632954"></td>
+            </tr>
+            <tr>
+                <td><label>중심점 위도</label></td>
+                <td><input type="text" name="latitude" value="37.5079523"></td>
+            </tr>
+            <tr>
+                <td><label>반경</label></td>
+                <td><input type="text" name="radius" value="100"></td>
+            </tr>
+        </table>
+        <input type="submit" value="전송">
+    </form>
+</body>
+</html>
