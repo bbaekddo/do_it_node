@@ -32,6 +32,19 @@ schema.createCustomSchema = (mongoose) => {
         }).limit(1).exec(callback);
     });
     
+    // 일정 범위 안의 카페 조회 static 함수
+    cafeSchema.static('findWithin', function(topLeftLongitude, topLeftLatitude, bottomRightLongitude, bottomRightLatitude, callback) {
+        console.log(`일정 범위 카페 조회 함수 호출됨`);
+        
+        this.find().where('geometry').within({
+            box : [
+                [parseFloat(topLeftLongitude), parseFloat(topLeftLatitude)],
+                [parseFloat(bottomRightLongitude), parseFloat(bottomRightLatitude)]
+            ]
+        }).exec(callback);
+    });
+
+    
     console.log('Cafe 스키마 생성 완료');
     
     return cafeSchema;

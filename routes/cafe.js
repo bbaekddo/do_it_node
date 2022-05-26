@@ -173,8 +173,67 @@ const findNear = function(req, res) {
     }
 }
 
+// 일정 범위 안의 카페 검색
+const findWithin = function(req, res) {
+    console.log(`cafe 모듈 안에 있는 findWithin 호출됨`);
+    
+    const paramTopLeftLongitude = req.body.topLeftLongitude || req.query.topLeftLongitude;
+    const paramTopLeftLatitude = req.body.topLeftLatitude || req.query.topLeftLatitude;
+    const paramBottomRightLongitude = req.body.bottomRightLongitude || req.query.bottomRightLongitude;
+    const paramBottomRightLatitude = req.body.bottomRightLatitude || req.query.bottomRightLatitude;
+    
+    console.log(`요청 파라미터 : ${paramTopLeftLongitude}, ${paramTopLeftLatitude}, ${paramBottomRightLongitude}, ${paramTopLeftLatitude}`);
+    
+    // 데이터베이스 객체 참조
+    const globalDB = req.app.get('database');
+    
+    // 데이터베이스 객체가 초기화 된 경우
+    if (globalDB.db) {
+        globalDB.cafeModel.findWithin(paramTopLeftLongitude, paramTopLeftLatitude, paramBottomRightLongitude, paramBottomRightLatitude, function(error, results) {
+            if (error) {
+                console.error(`카페 검색 중 에러 발생 : ${error.stack}`);
+                
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>카페 검색 중 에러 발생</h2>`);
+                res.write(`<p>${error.stack}</p>`);
+                res.end();
+            }
+            
+            if (results.length > 0) {
+                console.dir(results);
+                
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>범위 내 카페</h2>`);
+                res.write(`<div><ul>`);
+                
+                for (let i = 0; i < results.length; i++) {
+                    const cafeName = results[i]._doc.name;
+                    const cafeAddress = results[i]._doc.address;
+                    const cafePhone = results[i]._doc.phone;
+                    const cafeLongitude = results[i]._doc.geometry.coordinates[0];
+                    const cafeLatitude = results[i]._doc.geometry.coordinates[1];
+                    
+                    res.write(`<li>#${i + 1} : ${cafeName}, ${cafeAddress}, ${cafePhone}, ${cafeLongitude}, ${cafeLatitude}</li>`);
+                }
+                
+                res.write(`</ul></div>`);
+                res.end();
+            } else {
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+                res.write(`<h2>범위 내 카페 조회 실패</h2>`);
+                res.end();
+            }
+        });
+    } else {
+        res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
+        res.write(`<h2>데이터베이스 연결 실패</h2>`);
+        res.end();
+    }
+}
+
 module.exports = {
     add,
     list,
-    findNear
+    findNear,
+    findWithin
 };
