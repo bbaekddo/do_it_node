@@ -144,22 +144,11 @@ const findNear = function(req, res) {
             
             if (results.length > 0) {
                 console.dir(results);
-                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
-                res.write(`<h2>가까운 카페</h2>`);
-                res.write(`<div><ul>`);
-                
-                for (let i = 0; i < results.length; i++) {
-                    const currentName = results[i]._doc.name;
-                    const currentAddress = results[i]._doc.address;
-                    const currentPhone = results[i]._doc.phone;
-                    const currentLongitude = results[i].geometry.coordinates[0];
-                    const currentLatitude = results[i].geometry.coordinates[1];
-                    
-                    res.write(`<li>#${i + 1} : ${currentName}, ${currentAddress}, ${currentPhone}, ${currentLongitude}, ${currentLatitude}</li>`);
-                }
-                
-                res.write(`</ul></div>`);
-                res.end();
+                res.render('findNear.ejs', {
+                    result: results[0]._doc,
+                    paramLongitude: paramLongitude,
+                    paramLatitude: paramLatitude
+                });
             } else {
                 res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
                 res.write(`<h2>가까운 카페 조회 실패</h2>`);
