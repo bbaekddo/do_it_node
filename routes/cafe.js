@@ -166,12 +166,15 @@ const findNear = function(req, res) {
 const findWithin = function(req, res) {
     console.log(`cafe 모듈 안에 있는 findWithin 호출됨`);
     
-    const paramTopLeftLongitude = req.body.topLeftLongitude || req.query.topLeftLongitude;
-    const paramTopLeftLatitude = req.body.topLeftLatitude || req.query.topLeftLatitude;
-    const paramBottomRightLongitude = req.body.bottomRightLongitude || req.query.bottomRightLongitude;
-    const paramBottomRightLatitude = req.body.bottomRightLatitude || req.query.bottomRightLatitude;
+    const paramLongitude = req.body.longitude || req.query.longitude;
+    const paramLatitude = req.body.latitude || req.query.latitude;
     
-    console.log(`요청 파라미터 : ${paramTopLeftLongitude}, ${paramTopLeftLatitude}, ${paramBottomRightLongitude}, ${paramTopLeftLatitude}`);
+    const paramTopLeftLongitude = parseFloat(paramLongitude) - 0.001;
+    const paramTopLeftLatitude = parseFloat(paramLatitude) + 0.001;
+    const paramBottomRightLongitude = parseFloat(paramLongitude) + 0.001;
+    const paramBottomRightLatitude = parseFloat(paramLatitude) - 0.001;
+    
+    console.log(`요청 파라미터 : ${paramLongitude}, ${paramLatitude}`);
     
     // 데이터베이스 객체 참조
     const globalDB = req.app.get('database');
@@ -191,22 +194,15 @@ const findWithin = function(req, res) {
             if (results.length > 0) {
                 console.dir(results);
                 
-                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
-                res.write(`<h2>범위 내 카페</h2>`);
-                res.write(`<div><ul>`);
-                
-                for (let i = 0; i < results.length; i++) {
-                    const cafeName = results[i]._doc.name;
-                    const cafeAddress = results[i]._doc.address;
-                    const cafePhone = results[i]._doc.phone;
-                    const cafeLongitude = results[i]._doc.geometry.coordinates[0];
-                    const cafeLatitude = results[i]._doc.geometry.coordinates[1];
-                    
-                    res.write(`<li>#${i + 1} : ${cafeName}, ${cafeAddress}, ${cafePhone}, ${cafeLongitude}, ${cafeLatitude}</li>`);
-                }
-                
-                res.write(`</ul></div>`);
-                res.end();
+                res.render('findWithin.ejs', {
+                    result: results[0]._doc,
+                    paramLongitude: paramLongitude,
+                    paramLatitude: paramLatitude,
+                    paramTopLeftLongitude: paramTopLeftLongitude,
+                    paramTopLeftLatitude: paramTopLeftLatitude,
+                    paramBottomRightLongitude: paramBottomRightLongitude,
+                    paramBottomRightLatitude: paramBottomRightLatitude
+                });
             } else {
                 res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
                 res.write(`<h2>반경 내 카페 조회 실패</h2>`);
