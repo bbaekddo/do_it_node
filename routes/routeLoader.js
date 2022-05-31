@@ -18,7 +18,7 @@ loader.init = function(app, router) {
         console.log(`route path : ${routePath}, route method : ${routeMethod}`);
     })
     
-    // app.use('/', router);
+    app.use('/', router);
 }
 
 module.exports = loader;

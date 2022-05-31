@@ -6,12 +6,23 @@ setting.dbURL = 'mongodb://localhost:27017/local';
 setting.dbSchemas = [
     {
         file: `${__dirname}/../database/userSchema`,
-        collection: 'users5',
+        collection: 'users6',
         schemaName: 'userSchema',
         modelName: 'userModel'
+    },
+    {
+        file: `${__dirname}/../database/cafeSchema`,
+        collection: 'cafe',
+        schemaName: 'cafeSchema',
+        modelName: 'cafeModel'
     }
 ];
 setting.routeInfo = [
+    { file: `${__dirname}/../routes/cafe`, path: '/process/addCafe', method: 'add', type: 'post' },
+    { file: `${__dirname}/../routes/cafe`, path: '/process/listCafe', method: 'list', type: 'post' },
+    { file: `${__dirname}/../routes/cafe`, path: '/process/nearCafe', method: 'findNear', type: 'post' },
+    { file: `${__dirname}/../routes/cafe`, path: '/process/withinCafe', method: 'findWithin', type: 'post'},
+    { file: `${__dirname}/../routes/cafe`, path: '/process/circleCafe', method: 'findCircle', type: 'post'}
 ];
 setting.facebook = {
     clientID: 'id',

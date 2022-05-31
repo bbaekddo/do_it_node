@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const schema = {};
 
 // 데이터베이스 스키마 객체를 위한 변수 선언
-schema.createUserSchema = function(mongoose) {
+schema.createCustomSchema = function(mongoose) {
     /*
     * 스키마 정의
     * password를 hashedPassword로 변경
@@ -71,7 +71,7 @@ schema.createUserSchema = function(mongoose) {
         return this.find({ }, callback);
     });
     
-    console.log('스키마 생성 완료');
+    console.log('User 스키마 생성 완료');
 
     return userSchema;
 };
