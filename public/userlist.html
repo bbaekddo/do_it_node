@@ -7,13 +7,14 @@
 <body>
     <h1>사용자 리스트</h1>
     <br>
-    <form method="post" action="/process/userlist">
+    <form method="post" action="/process/listUser">
         <table>
-            <tr>
-                <td><label>아래 [Submit] 버튼을 누르세요</label></td>
+            <tr class="row" style="text-align: center; vertical-align: middle">
+                <td id="buttonContainer">
+                    <input type="submit" id="submitButton" class="ui primary button" value="조회">
+                </td>
             </tr>
         </table>
-        <input type="submit" value="Submit">
     </form>
 </body>
 </html>
