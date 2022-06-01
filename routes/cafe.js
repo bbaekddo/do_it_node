@@ -32,7 +32,7 @@ const add = function(req, res) {
                 res.write(`<h2>카페 추가 성공</h2>`);
                 res.end();
             } else{
-                res.writeHead('200', {'Content-Type': 'text/html; charset=utf8' });
+                res.writeHead('200', { 'Content-Type': 'text/html; charset=utf8' });
                 res.write(`<h2>카페 추가 실패</h2>`);
                 res.end();
             }

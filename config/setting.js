@@ -15,6 +15,12 @@ setting.dbSchemas = [
         collection: 'cafe',
         schemaName: 'cafeSchema',
         modelName: 'cafeModel'
+    },
+    {
+        file: `${__dirname}/../database/postSchema`,
+        collection: 'posts',
+        schemaName: 'postSchema',
+        modelName: 'postModel'
     }
 ];
 setting.routeInfo = [
